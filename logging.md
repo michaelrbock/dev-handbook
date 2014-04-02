@@ -1,0 +1,4 @@
+Logging
+=======
+
+Guidelines on logging
