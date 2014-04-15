@@ -7,36 +7,34 @@ The purpose of logging is to allow transparency into computer programs. It is us
 
 Logging can focus on a particular part of code (unit) or on a whole process (integration).
 
-
-Log Levels
-----------
-
 Logs are broken into severity levels. Each level has a set of standards. These levels are grouped into four larger categories that we are more concerned with:
     1. Process Layer
     2. Application Errors
     3. Application Audit Information
     4. Application Statuses
 
-### 1. Process Layer (ops)
+1. Process Layer (ops)
+----------------------
+
 e.g. containers, process control systems, buildpacks, etc
 
 These logs are usually dealt with in dev-ops environments. We give a brief summary of these levels.
 
-#### Emergency (level 0)
+### Emergency (level 0)
 *Emergency: system is unusable*
 The highest priority, usually reserved for catastrophic failures and reboot notices.
 
-#### Alert (level 1)
+### Alert (level 1)
 *Alert: action must be taken immediately*
 A serious failure in a key system.
 
 These are the Pagerduty alarms. They often bubbles up from error, warning, or critical logs.
 
 
-### 2. Application Errors
+2. Application Errors
+---------------------
 
-#### Levels
-##### Critical (level 2)
+### Critical (level 2)
 A failure in a key system.
 
 This is when an error occurred and the process cannot recover and continue. It is often logged right before exiting with code 1. See error handling documentation for best error handling practices.
@@ -44,73 +42,80 @@ This is when an error occurred and the process cannot recover and continue. It i
 e.g "could not connect to database"
 
 
-##### Error (level 3)
+### Error (level 3)
 Something has failed.
 
 This is when an error occurred but we recovered and the application can continue running. See error handling documentation for best error handling practices.
 
 e.g. "requested page does not exists"
 
-##### Logging practices
+******************************************
+
+### Logging practices
 1. Log error
 
 **Node**: use 'console.error' *todo - use a logging library*
+
 **Python**: use 'logging.error'
+
 **Go**: 'log.Errorf' *todo - use a logging library*
 
 2. Send to Sentry or appropriate error alert system.
 
-#### Logging Format
 
-- error context (which function etc)
-- message/reason
-- type user/external/internal
-- stack trace
-- (error code? used to find exact line where error was thrown, see error documentation)
+### Logging Format
+
+1. error context (which function etc)
+2. message/reason
+3. type user/external/internal
+4. stack trace
+5. (error code? used to find exact line where error was thrown, see error documentation)
 
 
-### 3. Application Audit Information
+3. Application Audit Information
+--------------------------------
 
-#### Levels
-
-##### Warning (level 4)
+### Warning (level 4)
 Something is amiss and might fail if not corrected.
 
 These are warning messages (not an error) but an indication that an error will occur if action is not taken.
 
 e.g. "file system 85% full"
 
-##### Notice (level 5) (aka "lifecycle")
+### Notice (level 5) (aka "lifecycle")
 Things of moderate interest to the user or administrator.
 
 This is information such as progress information, significant events, auditing information.
 
 e.g. "worker Y started with payload X"
 
+******************************************
 
-#### Logging pattern
+### Pattern
 
 Log starting and ending of major components or anything needed to show the major work flow of our system.
 
 **Node**: use 'console.log' *todo - use a logging library*
+
 **Python**: use 'logging.info'
+
 **Go**: 'log.Print(f|ln)' *todo - use a logging library*
 
 
-#### Logging Format
+### Format
 
-- component name (e.g. which process/worker)
-- input or output
-- actor (user, process name, system id)
+1. component name (e.g. which process/worker)
+2. input or output
+3. actor (user, process name, system id)
 
 e.g. "system\_id=123456789012: csv-processor started with payload '123456789012'"
   "system\_id=123456789012: csv-processor successfully reserved 'reservation-123456789012'"
 
-### 4. Application Status
 
-#### Levels
+4. Application Status
+---------------------
 
-##### Info (level 6)
+### Info (level 6)
 
 The lowest priority that you would normally log, and purely informational in nature.
 
@@ -119,20 +124,22 @@ This is the most common type of logging. It explains how the application is runn
 e.g. "validating url"
 
 
-###### Logging pattern
+#### Pattern
 
 Log starting and ending of major components or anything needed to show the major work flow of our system.
 
 **Node**: use 'console.log' *todo - use a logging library*
+
 **Python**: use 'logging.info'
+
 **Go**: 'log.Print(f|ln)' *todo - use a logging library*
 
 
-###### Logging Format
+#### Format
 
-- Component name
-- Message/reason
-- Context (often input or env info)
+1. Component name
+2. Message/reason
+3. Context (often input or env info)
   - *name any object you dump (like payload, uri, csv headers, DOM object)*
 
 e.g. "csv-processor:info validating input payload '{"archive": ObjectId("123456789012")}'"
@@ -141,18 +148,21 @@ e.g. "csv-processor:info validating input payload '{"archive": ObjectId("1234567
 
 **NOTE** avoid info logs within loops
 
-#### Debug (level 7)
+
+### Debug (level 7)
 
 This is the lowest priority, and normally not logged except for messages from the kernel. It is often turned on or off based on the environment. It is essentially a trace.
 
-###### Logging pattern
+#### Pattern
 
 **Node**: use 'debug'
+
 **Python**: use 'logging.debug'
+
 **Go**: no standard at the moment
 
 
-###### Logging Format
+##### Format
 There is no standard format. Debugging is for whatever you need as it is only for the development environment.
 
 **NOTE** your code is for developers too, so make it clear why you are logging something or needed to log something.
