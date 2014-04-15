@@ -1,155 +1,186 @@
 Logging
 =======
 
-Guidelines on logging
+Logging is _TODO: define logging_
+
+The purpose of logging is to allow transparency into computer programs. It is used to keep tabs on processes running and to allow investigative analysis. Some examples of when logs are investigated include: audits, crash reports, partner dialogs, certain aggregation metrics, and diagnosing problems.
+
+Logging can focus on a particular part of code (unit) or on a whole process (integration).
+
 
 Log Levels
 ----------
 
-# 1. Process Layer (ops)
-e.g. containers, supervisor, buildpacks, etc
+Logs are broken into severity levels. Each level has a set of standards. These levels are grouped into four larger categories that we are more concerned with:
+    1. Process Layer
+    2. Application Errors
+    3. Application Audit Information
+    4. Application Statuses
 
-## Emergency (level 0)
+### 1. Process Layer (ops)
+e.g. containers, process control systems, buildpacks, etc
+
+These logs are usually dealt with in dev-ops environments. We give a brief summary of these levels.
+
+#### Emergency (level 0)
+*Emergency: system is unusable*
 The highest priority, usually reserved for catastrophic failures and reboot notices.
 
-## Alert (level 1)
+#### Alert (level 1)
+*Alert: action must be taken immediately*
 A serious failure in a key system.
 
-Pagerduty alarms. Often bubbles up from error, warning, or critical logs.
+These are the Pagerduty alarms. They often bubbles up from error, warning, or critical logs.
 
 
-# 2. Application Errors
+### 2. Application Errors
 
-## Critical (level 2)
-
-Node- use 'console.error' *todo - use a logging library*
-Python - use 'logging.error'
-Go - 'log.Errorf' *todo - use a logging library*
-
-Send to Sentry.
-
+#### Levels
+##### Critical (level 2)
 A failure in a key system.
 
-Error happened, can't continue. The message right before exiting with code 1. See error handling docucumentation.
+This is when an error occurred and the process cannot recover and continue. It is often logged right before exiting with code 1. See error handling documentation for best error handling practices.
 
 e.g "could not connect to database"
 
-## Error (level 3)
 
-Node- use 'console.error' *todo - use a logging library*
-Python - use 'logging.error'
-Go - 'log.Errorf' *todo - use a logging library*
+##### Error (level 3)
+Something has failed.
 
-Send to Sentry.
+This is when an error occurred but we recovered and the application can continue running. See error handling documentation for best error handling practices.
 
-Something has failed. But the application can continue. See error handling documentation.
+e.g. "requested page does not exists"
 
-## Pattern
-1. log error
-   context (which function etc), message/reason, type user/external/internal, stack trace, (error code? used to find exact line where error was thrown, see error documentation)
-   
-2. send to sentry
+##### Logging practices
+1. Log error
 
-# 3. Application Audit Information
+**Node**: use 'console.error' *todo - use a logging library*
+**Python**: use 'logging.error'
+**Go**: 'log.Errorf' *todo - use a logging library*
 
-Node- use 'console.log' *todo - use a logging library*
-Python - use 'logging.info'
-Go - 'log.Print(f|ln)' *todo -use a logging library*
+2. Send to Sentry or appropriate error alert system.
 
-## Warning (level 4)
+#### Logging Format
 
-Warning messages, not an error, but indication that an error will occur if action is not taken, e.g. file system 85% full - each item must be resolved within a given time.
-
-Something is amiss and might fail if not corrected. 
-
-Something bad happened that we recovered from, like "this shouldn't happen but it isn't fatal"
+- error context (which function etc)
+- message/reason
+- type user/external/internal
+- stack trace
+- (error code? used to find exact line where error was thrown, see error documentation)
 
 
-## Notice (level 5) (aka lifecycle")
+### 3. Application Audit Information
+
+#### Levels
+
+##### Warning (level 4)
+Something is amiss and might fail if not corrected.
+
+These are warning messages (not an error) but an indication that an error will occur if action is not taken.
+
+e.g. "file system 85% full"
+
+##### Notice (level 5) (aka "lifecycle")
 Things of moderate interest to the user or administrator.
 
-Auditing
+This is information such as progress information, significant events, auditing information.
 
 e.g. "worker Y started with payload X"
 
-progress information, significant events
 
-# Pattern
-Log starting and ending of major components
+#### Logging pattern
 
-1. component name (e.g. which process/worker)
-2. input or output
-3. actor (user, process name, system id)
-   
+Log starting and ending of major components or anything needed to show the major work flow of our system.
+
+**Node**: use 'console.log' *todo - use a logging library*
+**Python**: use 'logging.info'
+**Go**: 'log.Print(f|ln)' *todo - use a logging library*
+
+
+#### Logging Format
+
+- component name (e.g. which process/worker)
+- input or output
+- actor (user, process name, system id)
+
 e.g. "system\_id=123456789012: csv-processor started with payload '123456789012'"
   "system\_id=123456789012: csv-processor successfully reserved 'reservation-123456789012'"
-        
-show the major work flow of our system
-should be concise
-should be filterable - if components go together, you should be able to filter for those components
-should link related processes (e.g. using a prefix, using system-id in agents)
 
+### 4. Application Status
 
-# 4. Application Status
+#### Levels
 
-## Info (level 6)
-
-Node- use 'console.log' *todo - use a logging library*
-Python - use 'logging.info'
-Go - 'log.Print(f|ln)' *todo -use a logging library*
+##### Info (level 6)
 
 The lowest priority that you would normally log, and purely informational in nature.
-Most common, how the application is running, what component is running at what point
+
+This is the most common type of logging. It explains how the application is running, what component is running at what point, etc. It is mostly for investigative purposes after the fact.
 
 e.g. "validating url"
 
-mostly for investigative purposes after the fact or watching
 
-# Pattern
+###### Logging pattern
 
-1. Component name
-2. Message/reason
-3. Context (often input or env info)
-  - name any object you dump (like payload, uri, csv headers, DOM object)
+Log starting and ending of major components or anything needed to show the major work flow of our system.
+
+**Node**: use 'console.log' *todo - use a logging library*
+**Python**: use 'logging.info'
+**Go**: 'log.Print(f|ln)' *todo - use a logging library*
+
+
+###### Logging Format
+
+- Component name
+- Message/reason
+- Context (often input or env info)
+  - *name any object you dump (like payload, uri, csv headers, DOM object)*
 
 e.g. "csv-processor:info validating input payload '{"archive": ObjectId("123456789012")}'"
 
-*** individual lines should be readable and provide any necessary context to understand what is going on at that point
+**NOTE** individual lines should be readable and provide any necessary context to understand what is going on at that point.
 
-avoid info logs within loops
-don't clog up logs
-filterable
-concise
+**NOTE** avoid info logs within loops
 
-## Debug (level 7)
+#### Debug (level 7)
 
-The lowest priority, and normally not logged except for messages from the kernel.
+This is the lowest priority, and normally not logged except for messages from the kernel. It is often turned on or off based on the environment. It is essentially a trace.
 
-Often turned on or off based on environment.
+###### Logging pattern
 
-Trace
-
-Node - use 'debug'
-Python - use 'logging.debug'
-Go - no standard at the moment
+**Node**: use 'debug'
+**Python**: use 'logging.debug'
+**Go**: no standard at the moment
 
 
-# Pattern
-none, whatever you need if its only for development environment, but remember your code is for other developers too, so make it clear why you are logging something or needed to log something
+###### Logging Format
+There is no standard format. Debugging is for whatever you need as it is only for the development environment.
+
+**NOTE** your code is for developers too, so make it clear why you are logging something or needed to log something.
 
 
-# Security
+Security
+--------
 
-Don't log credentials (e.g. log usernames not username/password pairs) or sensitive information (e.g. student data)
+Don't log credentials.
+  e.g. log usernames not username/password pairs) or sensitive information (e.g. student data)
 
-Aim: Would it be ok to send these logs on hipchat or to a auditor? At least for notice and above.
+**NOTE** Would it be ok to send these logs on hipchat or to a auditor? This is a must for notice level and above.
 
+
+Best Practices
+--------------
+**Individual lines should be *readable* and provide any necessary *context* to understand what is going on at that point.**
 
 - remember consecutive lines for one process are not necessarily consecutive in the logs with aggregation
 
-- follow logging format to be set out below
+- Be concise
 
-- individual lines should be readable and provide any necessary context to understand what is going on at that point
+- log lines should be filterable - if components go together, you should be able to filter for those components
+
+- log messages should link related processes (e.g. using a prefix, using system-id in agents)
+
+
+- follow logging format to be set out below
 
 
 
