@@ -1,5 +1,4 @@
-Logging
-=======
+# Logging
 
 This document defines logging and the expectations from logs that are generated at different parts of the system. The purpose of logging is to allow transparency into the state of systems. It is used to keep tabs on processes running and to allow investigative analysis. Some examples of when logs are investigated include: _audits, crash reports, partner dialogs, certain aggregation metrics, and diagnosing problems._
 
@@ -12,8 +11,7 @@ The levels are grouped into four larger categories that we are more concerned wi
   3. Application Audit Information
   4. Application Status Logs
 
-Best Practices
---------------
+## Best Practices
 
 **Individual lines should be *readable* and provide any necessary *context* to understand what is going on at that point.**
 
@@ -26,8 +24,7 @@ Best Practices
 
 - Log messages should link related processes (e.g. using a prefix, using a common id across a system).
 
-Logging Format
----------------
+## Logging Format
 
 Logs should be machine parsable but human readable. 
 
@@ -35,8 +32,7 @@ Logs should be machine parsable but human readable.
  - whenever possible add unique identifiers to the start of the log line. e.g. `[b65318c4-8330-4d50-993d-6d76d41c29bb] REQUEST: path=/resource/id remoteaddr=127.0.0.1:47059 Connection=close`
  - the application deployment environment should append _hostnames_, _process name_ and ideally _log level_ to the beginning of the line.  `Jun  9 22:50:55 instance-type-12389123 logger-tag: process_name 11011904: id=000000 action=posting-coach....`
 
-Security
---------
+## Security
 
 **Don't log credentials!**
 
@@ -45,8 +41,7 @@ Security
 
 **NOTE** Ask yourself: would it be ok to send these logs on Hipchat or to a auditor? If not, don't log it. This is a must for notice level and above.
 
-Process Layer (ops)
-----------------------
+## Process Layer (ops)
 
 *e.g. containers, process control systems, buildpacks, etc*
 
@@ -64,8 +59,7 @@ Expected Levels:
 | 1     | **Alert**      | *Alert: action must be taken immediately* | A serious failure in a key system </br> - These are the Pagerduty alarms. They often bubbles up from error, warning, or critical logs. | 
 
 
-Application Errors
-------------------
+## Application Errors
 
 Running application code should make note of any known and unknown error conditions. There should be no unexpected errors that are ignored - see `Application Audit Information` for situations where it might be reasonable to swallow errors.
 
@@ -103,8 +97,7 @@ Examples of situations where Application Errors can usually be found:
 3. type of error (eg. user, external, internal). External errors are usually errors from network dependencies (third-party API, database error)
 4. stack trace and/or error code that can be used to find exact line where error was thrown.
 
-Application Audit Information
---------------------------------
+## Application Audit Information
 
 Audit information is concerned with exposing in logs information about significant events in a running system. This information can be used to design automated systems that keep tabs on the health of the 
 application. These logs are also used to create reports on failure rates and planning for future optimizations to the system. Some examples of audit logs are listed below:
@@ -143,8 +136,7 @@ application. These logs are also used to create reports on failure rates and pla
   "system\_id=123456789012: csv-processor successfully reserved 'reservation-123456789012'"
 
 
-Application Status
--------------------
+## Application Status
 
 These logs are typically used to identify the operational state of a running system, or getting additional context when investigating issues. Using Audit logs, it should be easy to build a model of 
 the application flow. 
