@@ -10,7 +10,40 @@ The levels are grouped into four larger categories that we are more concerned wi
   1. Process Layer Logs
   2. Application Errors
   3. Application Audit Information
-  4. Application Statuses
+  4. Application Status Logs
+
+Best Practices
+--------------
+
+**Individual lines should be *readable* and provide any necessary *context* to understand what is going on at that point.**
+
+- Remember: consecutive lines for one process are not necessarily consecutive in the logs once aggregated. Avoid logging within `loops` or functions that are called 
+  repeatedly that might generate more noise than context.
+
+- Be concise.
+
+- Log lines should be filterable - if components go together, you should be able to filter for those components.
+
+- Log messages should link related processes (e.g. using a prefix, using a common id across a system).
+
+Logging Format
+---------------
+
+Logs should be machine parsable but human readable. 
+
+ - log with `key:value` pairs. e.g. `route:api/sso type:invalid-request message:"access code not found" user:"john doe"`
+ - whenever possible add unique identifiers to the start of the log line. e.g. `[b65318c4-8330-4d50-993d-6d76d41c29bb] REQUEST: path=/resource/id remoteaddr=127.0.0.1:47059 Connection=close`
+ - the application deployment environment should append _hostnames_, _process name_ and ideally _log level_ to the beginning of the line.  `Jun  9 22:50:55 instance-type-12389123 logger-tag: process_name 11011904: id=000000 action=posting-coach....`
+
+Security
+--------
+
+**Don't log credentials!**
+
+- log usernames not username/password pairs
+- don't log sensitive information (e.g. student data)
+
+**NOTE** Ask yourself: would it be ok to send these logs on Hipchat or to a auditor? If not, don't log it. This is a must for notice level and above.
 
 Process Layer (ops)
 ----------------------
@@ -41,7 +74,7 @@ Examples of situations where Application Errors can usually be found:
 - Errors during requests or connections to external services. (database connections, third-party or internal APIs)
 - Validation failures when processing user entered data.
 - Disk write failures, network connection errors and other system failures.
-- Unexpected data or conditionals (eg. places where you want to comment // this should never have happened)
+- Unexpected data or conditionals (eg. places where you want to comment `this should never have happened`)
 
 #### Levels
 
@@ -51,8 +84,8 @@ Examples of situations where Application Errors can usually be found:
 | 3     | **Error**      | *Something has failed* | This is when an error occurred but we recovered and the application can continue running. </br> (See error handling documentation for best error handling practices) </br> e.g. "request to fetch user failed. please try again" | 
 
 
-#### Logging practices
-1. Log error:
+#### Logging practices for Application Errors
+1. **Errror*:
 
     **Node**: use 'console.error' or use a logging library
 
@@ -60,20 +93,26 @@ Examples of situations where Application Errors can usually be found:
 
     **Go**: 'log.Errorf' or use a logging library
 
-2. Send to Sentry or appropriate error alert system.
+2. **Critical** Log using the same format used for *Error* and send to an appropriate error **alert system** (eg. Sentry)
 
 
-#### Logging Format
+#### Logging Format for Application Errors
 
-1. error context (which function etc)
+1. error context (the application name, function name, operational context)
 2. message/reason
-3. type user/external/internal
-4. stack trace
-5. (error code? used to find exact line where error was thrown, see error documentation)
-
+3. type of error (eg. user, external, internal). External errors are usually errors from network dependencies (third-party API, database error)
+4. stack trace and/or error code that can be used to find exact line where error was thrown.
 
 Application Audit Information
 --------------------------------
+
+Audit information is concerned with exposing in logs information about significant events in a running system. This information can be used to design automated systems that keep tabs on the health of the 
+application. These logs are also used to create reports on failure rates and planning for future optimizations to the system. Some examples of audit logs are listed below:
+
+ - Application startup and shutdown
+ - Start and end of jobs, including exit status
+ - Access logs (users logging in to the application)
+ - Requests and return status
 
 #### Levels
 
@@ -83,19 +122,18 @@ Application Audit Information
 | 5     | **Notice**   | *Things of moderate interest to the user or administrator.*                                                    | This is information such as progress information, significant events, auditing information. </br> e.g. "worker Y started with payload X" |
 
 
-
-#### Logging Practices
+#### Logging Practices for Application Audit Logs
 
 1. Log starting and ending of major components or anything needed to show the major work flow of our system.
 
-    **Node**: use 'console.log' *todo - use a logging library*
+    **Node**: use 'console.log' or a logging library
 
-    **Python**: use 'logging.info'
+    **Python**: use 'logging.info' or 'logging.notice'
 
-    **Go**: 'log.Print(f|ln)' *todo - use a logging library*
+    **Go**: 'log.Print(f|ln)' or use a logging library
 
 
-#### Logging Format
+#### Logging Format for Application Audit Logs
 
 1. component name (e.g. which process/worker)
 2. input or output
@@ -106,7 +144,11 @@ Application Audit Information
 
 
 Application Status
----------------------
+-------------------
+
+These logs are typically used to identify the operational state of a running system, or getting additional context when investigating issues. Using Audit logs, it should be easy to build a model of 
+the application flow. 
+
 
 #### Levels
 
@@ -160,34 +202,3 @@ Application Status
 There is no standard format. Debugging is for whatever you need as it is only for the development environment.
 
 **NOTE** Your code is for developers too, so make it clear why you are logging something or needed to log something.
-
-
-Security
---------
-
-**Don't log credentials!**
-
-- log usernames not username/password pairs
-- don't log sensitive information (e.g. student data)
-
-**NOTE** Ask yourself: would it be ok to send these logs on Hipchat or to a auditor? If not, don't log it. This is a must for notice level and above.
-
-
-Best Practices
---------------
-
-**Individual lines should be *readable* and provide any necessary *context* to understand what is going on at that point.**
-
-- Remember: consecutive lines for one process are not necessarily consecutive in the logs once aggregated.
-
-- Be concise.
-
-- Log lines should be filterable - if components go together, you should be able to filter for those components.
-
-- Log messages should link related processes (e.g. using a prefix, using a common id across a system).
-
-- Follow logging format to be set out below.
-
-
-
-TODO: logging format, machine parsable but still human readable
